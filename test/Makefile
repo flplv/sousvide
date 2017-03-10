@@ -31,7 +31,7 @@ pre:
 	rm -rf $(cpp_objs)
 
 run: $(output)
-	./$(output)
+	./$(output) -a
 
 clean:
 	rm -rf objs

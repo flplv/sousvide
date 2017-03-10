@@ -3,7 +3,7 @@
 
 enum errors
 {
-    error_owts_no_presence,
+    error_owts_event_buffer_too_small
 };
 
 /* Platform dependent error function. */
