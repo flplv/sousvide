@@ -1,3 +1,4 @@
 objs/
 .tags*
-.objs_*
+objs_*
+sousvide_lpcxpresso.axf

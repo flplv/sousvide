@@ -232,6 +232,7 @@ void owts_start_conversion ()
     pulse_read_byte ();
     pulse_read_byte ();
     pulse_initialize ();
+    owts_isr_register_call (owts_on_timeout, 1000);
 }
 
 void owts_init ()
