@@ -30,8 +30,9 @@ void owts_isr_register_call ( void (*cb)(uint16_t), uint16_t timestamp)
     Chip_TIMER_Enable(LPC_TIMER32_0);
 }
 
-void owts_on_temperature (enum conversion_result result, uint16_t timestamp)
+void owts_on_temperature (enum conversion_result result, uint16_t temperature)
 {
+	printf ("On Temperature result: %d / %d\n", result, temperature);
     owts_cb = NULL;
 }
 
