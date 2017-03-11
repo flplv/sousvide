@@ -6,11 +6,8 @@
 
 namespace test_owts
 {
-    extern "C"
-    {
-        /* White testing : ) */
-        #include "owts.c"
-    }
+    /* White testing : ) */
+    #include "owts.c"
 
     TEST_CASE ("owts")
     {

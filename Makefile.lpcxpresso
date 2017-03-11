@@ -1,0 +1,78 @@
+ifeq (1,${V})
+	SILENT =
+else
+	SILENT = @
+endif
+
+TOOLCHAIN = /usr/local/lpcxpresso_8.2.2_650/lpcxpresso/tools/bin/arm-none-eabi-
+CC = $(TOOLCHAIN)gcc
+CPP = $(TOOLCHAIN)c++
+CXX = $(TOOLCHAIN)g++
+SIZE = $(TOOLCHAIN)size
+STRIP = $(TOOLCHAIN)strip
+AR = $(TOOLCHAIN)ar
+AS = $(TOOLCHAIN)as
+
+PROJECT = sousvide_lpcxpresso.axf
+OBJDIR = objs_lpcxpresso
+
+CFLAGS= -I ./src -I ./dep_lpcxpresso_11xx -I ./src_lpcxpresso_11xx \
+        -Wall -std=gnu11 -g -O0 \
+        -mcpu=cortex-m0 -mthumb \
+        -D CHIP_LPC11UXX \
+        -D CORE_M0 \
+        -D CR_INTEGER_PRINTF -D CR_PRINTF_CHAR -D__LPC11UXX__ \
+        -D__CODE_RED  \
+
+LDFLAGS= -nostdlib \
+         -Xlinker -Map="$(OBJDIR)/sousvide_lpcxpresso.map" \
+         -Xlinker --gc-sections \
+         -Xlinker -print-memory-usage \
+         -mcpu=cortex-m0 -mthumb -T "src_lpcxpresso_11xx/linker.ld"
+
+SRCFILES = \
+
+SRCDIRS = \
+	dep_lpcxpresso_11xx \
+	src_lpcxpresso_11xx \
+	src \
+
+get_src_from_dir  = $(wildcard $1/*.cpp) $(wildcard $1/*.c)
+get_dirs_from_dirspec  = $(wildcard $1)
+get_src_from_dir_list = $(foreach dir, $1, $(call get_src_from_dir,$(dir)))
+SRCS += $(SRCFILES) $(call get_src_from_dir_list, $(SRCDIRS))
+
+__src_to = $(subst .c,$1, $(subst .cpp,$1,$2))
+src_to = $(addprefix $(OBJDIR)/,$(call __src_to,$1,$2))
+src_to_o = $(call src_to,.o,$1)
+OBJS = $(call src_to_o,$(SRCS))
+
+all: $(PROJECT) size
+
+size:
+	$(SIZE) $(PROJECT)
+
+$(PROJECT): buildrepo $(OBJS)
+	@echo
+	@echo Linking $(PROJECT)
+	$(SILENT)$(CC) $(LDFLAGS) $(OBJS) -o $@
+	@chmod +x $(PROJECT)
+
+$(OBJDIR)/%.o: %.c
+	@echo Compiling $(notdir $<)
+	$(SILENT)$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm $(PROJECT) $(OBJDIR) -Rf
+
+buildrepo:
+	@$(call make-repo)
+
+# Create obj directory structure
+define make-repo
+	mkdir -p $(OBJDIR)
+	for dir in $(SRCDIRS); \
+	do \
+		mkdir -p $(OBJDIR)/$$dir; \
+	done
+endef
