@@ -24,6 +24,6 @@ void owts_start_conversion ();
 // Client defined functions, called from ISR
 bool owts_drive_line (enum owts_action);
 void owts_isr_register_call ( void (*cb)(uint16_t), uint16_t);
-void owts_on_temperature (enum conversion_result, uint16_t);
+void owts_on_temperature (enum conversion_result, int32_t);
 
 #endif // OWTS_H_

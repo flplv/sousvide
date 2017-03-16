@@ -4,25 +4,28 @@ else
 	SILENT = @
 endif
 
-TOOLCHAIN = /usr/local/lpcxpresso_8.2.2_650/lpcxpresso/tools/bin/arm-none-eabi-
-CC = $(TOOLCHAIN)gcc
-CPP = $(TOOLCHAIN)c++
-CXX = $(TOOLCHAIN)g++
-SIZE = $(TOOLCHAIN)size
-STRIP = $(TOOLCHAIN)strip
-AR = $(TOOLCHAIN)ar
-AS = $(TOOLCHAIN)as
+export PATH := /usr/local/lpcxpresso_8.2.2_650/lpcxpresso/tools/bin/:$(PATH)
+
+GCC_PREFIX = arm-none-eabi-
+CC = $(GCC_PREFIX)gcc
+CPP = $(GCC_PREFIX)c++
+CXX = $(GCC_PREFIX)g++
+SIZE = $(GCC_PREFIX)size
+STRIP = $(GCC_PREFIX)strip
+AR = $(GCC_PREFIX)ar
+AS = $(GCC_PREFIX)as
 
 PROJECT = sousvide_lpcxpresso.axf
 OBJDIR = objs_lpcxpresso
 
 CFLAGS= -I ./src -I ./dep_lpcxpresso_11xx -I ./src_lpcxpresso_11xx \
-        -Wall -std=gnu11 -g -O0 \
+        -Wall -std=gnu11 -g -O3 \
         -mcpu=cortex-m0 -mthumb \
         -D CHIP_LPC11UXX \
         -D CORE_M0 \
         -D CR_INTEGER_PRINTF -D CR_PRINTF_CHAR -D__LPC11UXX__ \
         -D__CODE_RED  \
+        -D__USE_CMSIS
 
 LDFLAGS= -nostdlib \
          -Xlinker -Map="$(OBJDIR)/sousvide_lpcxpresso.map" \

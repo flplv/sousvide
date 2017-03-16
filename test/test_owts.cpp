@@ -11,15 +11,15 @@ namespace test_owts
 
     TEST_CASE ("owts")
     {
+        owts_init ();
+        owts_start_conversion ();
         RESET_FAKE (owts_isr_register_call);
         RESET_FAKE (owts_drive_line);
         RESET_FAKE (owts_on_temperature);
         RESET_FAKE (error);
-        owts_init ();
 
         SECTION ("conversion")
         {
-            owts_start_conversion ();
             owts_on_timeout (0);
             owts_on_timeout (0);
 
@@ -108,6 +108,7 @@ namespace test_owts
                     SECTION ("read temperature")
                     {
                         uint16_t expected_raw_temperature = 0xBEEF;
+                        int32_t expected_temperature = ((int16_t)0xBEEF >> 1) * 125;
 
                         n = 8 * 2;
                         for (int i = 0; i < n; i++)
@@ -131,7 +132,7 @@ namespace test_owts
                         CHECK (event_buffer_empty () == true);
                         CHECK (owts_on_temperature_fake.call_count == 1);
                         CHECK (owts_on_temperature_fake.arg0_val == owts_conversion_success);
-                        CHECK (owts_on_temperature_fake.arg1_val == expected_raw_temperature);
+                        CHECK (owts_on_temperature_fake.arg1_val == expected_temperature);
                     }
                 }
             }

@@ -70,7 +70,7 @@ unsigned int *pDivRom_uidiv;
 //*****************************************************************************
 //
 // Forward declaration of the default handlers. These are aliased.
-// When the application defines a handler (with the same name), this will 
+// When the application defines a handler (with the same name), this will
 // automatically take precedence over these weak definitions
 //
 //*****************************************************************************

@@ -15,13 +15,13 @@
 #include "error.h"
 
 static const uint16_t period_reset = 480;
-static const uint16_t period_tx_presence = 70;
+static const uint16_t period_tx_presence = 40;
 static const uint16_t period_write_zero = 80;
 static const uint16_t period_line_settle_zero = 20;
-static const uint16_t period_write_one = 1;
+static const uint16_t period_write_one = 0;
 static const uint16_t period_line_settle_one = 100;
-static const uint16_t period_pull_aquire = 2;
-static const uint16_t period_aquire_timeout = 12;
+static const uint16_t period_pull_aquire = 1;
+static const uint16_t period_aquire_timeout = 0;
 static const uint16_t period_line_settle_aquire = 80;
 
 enum consume_result {
@@ -40,18 +40,18 @@ struct owts {
     struct event event_buffer [128];
     uint8_t event_buffer_read_pos;
     uint8_t event_buffer_write_pos;
-    uint16_t raw_temperature;
+    int16_t raw_temperature;
     uint8_t raw_temperature_bit_pos;
-    enum conversion_result conversion_result;
+	enum conversion_result conversion_result;
 };
 static struct owts d;
 
-static struct event * event_buffer_peek ()
+static inline struct event * event_buffer_peek ()
 {
     return &d.event_buffer[d.event_buffer_read_pos];
 }
 
-static void event_buffer_pop ()
+static inline void event_buffer_pop ()
 {
     d.event_buffer_read_pos++;
 }
@@ -67,17 +67,17 @@ static void event_buffer_rewind ()
     d.event_buffer_read_pos = 0;
 }
 
-static void event_buffer_recovery (int amount)
+static inline void event_buffer_recovery (int amount)
 {
     d.event_buffer_read_pos -= amount;
 }
 
-static bool event_buffer_empty ()
+static inline bool event_buffer_empty ()
 {
     return d.event_buffer_read_pos == d.event_buffer_write_pos;
 }
 
-static bool event_buffer_full ()
+static inline bool event_buffer_full ()
 {
     return d.event_buffer_write_pos == FL_ARRAY_SIZE (d.event_buffer);
 }
@@ -87,7 +87,7 @@ static enum consume_result consume_presence (bool state)
     if (state == 0)
         return ok;
 
-    owts_on_temperature (owts_conversion_no_presence, 0);
+    d.conversion_result = owts_conversion_no_presence;
     return abort;
 }
 
@@ -101,7 +101,7 @@ static enum consume_result consume_wait_conversion (bool state)
 
 static enum consume_result consume_bit (bool state)
 {
-    d.raw_temperature |= state << d.raw_temperature_bit_pos ++;
+    d.raw_temperature |= (state ? 1 : 0) << d.raw_temperature_bit_pos ++;
     return ok;
 }
 
@@ -181,12 +181,12 @@ static void pulse_read_byte ()
 
 static void owts_on_timeout (uint16_t timestamp)
 {
-    if (event_buffer_empty ())
-    {
-        owts_on_temperature (owts_conversion_fifo_unexpectedly_empty, 0);
-        owts_init ();
-        return;
-    }
+//    if (event_buffer_empty ())
+//    {
+//        owts_on_temperature (owts_conversion_fifo_unexpectedly_empty, 0);
+//        owts_init ();
+//        return;
+//    }
 
     struct event * e = event_buffer_peek ();
     event_buffer_pop ();
@@ -199,7 +199,10 @@ static void owts_on_timeout (uint16_t timestamp)
 
     if (result == abort)
     {
+    	enum conversion_result result = d.conversion_result;
         owts_init ();
+
+        owts_on_temperature (result, 0);
         return;
     }
 
@@ -209,11 +212,15 @@ static void owts_on_timeout (uint16_t timestamp)
     if (event_buffer_empty ())
     {
         /* end of transmission */
-        owts_on_temperature (d.raw_temperature_bit_pos == 16 ?
-                                owts_conversion_success :
-                                owts_conversion_fifo_unexpectedly_empty,
-                            d.raw_temperature);
+
+    	if (d.raw_temperature_bit_pos == 16)
+        	d.conversion_result = owts_conversion_success;
+
+    	enum conversion_result result = d.conversion_result;
+    	int32_t temp = ((int16_t)d.raw_temperature >> 1) * 125;
+
         owts_init ();
+        owts_on_temperature (result, temp);
         return;
     }
 
@@ -240,6 +247,7 @@ void owts_init ()
     event_buffer_rewind ();
     d.conversion_result = owts_conversion_fifo_unexpectedly_empty;
     d.raw_temperature_bit_pos = 0;
+    d.raw_temperature = 0;
 }
 
 void owts_deinit ()
