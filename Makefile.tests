@@ -14,8 +14,8 @@ OBJDIR = objs_test
 SRCFILES = \
 
 SRCDIRS = \
-	test \
-	src \
+    src \
+    test \
 
 get_src_from_dir  = $(wildcard $1/*.cpp) $(wildcard $1/*.c)
 get_dirs_from_dirspec  = $(wildcard $1)
@@ -30,7 +30,7 @@ OBJS = $(call src_to_o,$(SRCS))
 all: $(PROJECT) run
 
 run:
-	./$(PROJECT) -a
+	./$(PROJECT)
 
 $(PROJECT): buildrepo $(OBJS)
 	@echo
