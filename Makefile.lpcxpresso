@@ -18,14 +18,19 @@ AS = $(GCC_PREFIX)as
 PROJECT = sousvide_lpcxpresso.axf
 OBJDIR = objs_lpcxpresso
 
-CFLAGS= -I ./src -I ./dep_lpcxpresso_11xx -I ./src_lpcxpresso_11xx \
-        -Wall -std=gnu11 -g -O3 \
+CFLAGS= -I ./src \
+        -I ./dep_lpcxpresso_11xx \
+        -I ./src_lpcxpresso_11xx \
+        -I ./reacto-0.1.0-rc2/includes \
+        -Wall -std=gnu11 -g \
+        -O3 \
         -mcpu=cortex-m0 -mthumb \
         -D CHIP_LPC11UXX \
         -D CORE_M0 \
         -D CR_INTEGER_PRINTF -D CR_PRINTF_CHAR -D__LPC11UXX__ \
         -D__CODE_RED  \
-        -D__USE_CMSIS
+        -D__USE_CMSIS \
+        -D REACTO_SHORT_LOGS
 
 LDFLAGS= -nostdlib \
          -Xlinker -Map="$(OBJDIR)/sousvide_lpcxpresso.map" \
@@ -36,9 +41,12 @@ LDFLAGS= -nostdlib \
 SRCFILES = \
 
 SRCDIRS = \
-	dep_lpcxpresso_11xx \
-	src_lpcxpresso_11xx \
-	src \
+         dep_lpcxpresso_11xx \
+         src_lpcxpresso_11xx \
+         reacto-0.1.0-rc2/src/reusables \
+         reacto-0.1.0-rc2/src/watchdog \
+         reacto-0.1.0-rc2/src \
+         src \
 
 get_src_from_dir  = $(wildcard $1/*.cpp) $(wildcard $1/*.c)
 get_dirs_from_dirspec  = $(wildcard $1)
@@ -49,6 +57,9 @@ __src_to = $(subst .c,$1, $(subst .cpp,$1,$2))
 src_to = $(addprefix $(OBJDIR)/,$(call __src_to,$1,$2))
 src_to_o = $(call src_to,.o,$1)
 OBJS = $(call src_to_o,$(SRCS))
+
+DEPS := $(OBJS:.o=.d)
+-include $(DEPS)
 
 all: $(PROJECT) size
 
@@ -61,9 +72,11 @@ $(PROJECT): buildrepo $(OBJS)
 	$(SILENT)$(CC) $(LDFLAGS) $(OBJS) -o $@
 	@chmod +x $(PROJECT)
 
+
 $(OBJDIR)/%.o: %.c
+	@echo
 	@echo Compiling $(notdir $<)
-	$(SILENT)$(CC) $(CFLAGS) -c $< -o $@
+	$(SILENT)$(CC) $(CFLAGS) -c -MMD -o $@ $<
 
 clean:
 	rm $(PROJECT) $(OBJDIR) -Rf

@@ -155,6 +155,14 @@ const uint8_t bitmap_number_nine [GLYPH_DATA_LEN] = {
     XXX,
 };
 
+const uint8_t bitmap_number_dash [GLYPH_DATA_LEN] = {
+    ___,
+    ___,
+    XXX,
+    ___,
+    ___,
+};
+
 const uint8_t bitmap_symbol_temperature [GLYPH_DATA_LEN] = {
     XXXXXX,
     X_XX__,
@@ -169,4 +177,11 @@ const uint8_t bitmap_letter_time [GLYPH_DATA_LEN] = {
     XXX_X_,
     X___X_,
     XX__X_
+};
+
+const uint8_t * bitmap_digits [] = {
+		bitmap_number_zero, bitmap_number_one,
+		bitmap_number_two, bitmap_number_three, bitmap_number_four,
+		bitmap_number_five, bitmap_number_six, bitmap_number_seven,
+		bitmap_number_eight, bitmap_number_nine,
 };

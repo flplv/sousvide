@@ -13,7 +13,8 @@ extern const uint8_t bitmap_number_six [GLYPH_DATA_LEN];
 extern const uint8_t bitmap_number_seven [GLYPH_DATA_LEN];
 extern const uint8_t bitmap_number_eight [GLYPH_DATA_LEN];
 extern const uint8_t bitmap_number_nine [GLYPH_DATA_LEN];
+extern const uint8_t bitmap_number_dash [GLYPH_DATA_LEN];
 extern const uint8_t bitmap_symbol_temperature [GLYPH_DATA_LEN];
 extern const uint8_t bitmap_letter_time [GLYPH_DATA_LEN];
-
+extern const uint8_t * bitmap_digits [];
 #endif // DISPLAY_GLYPHS_H_

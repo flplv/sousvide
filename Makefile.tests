@@ -6,8 +6,8 @@ endif
 
 PROJECT = sousvide_tests
 
-CFLAGS= -I ./src -I ./test -Wall -std=gnu11 -g -O0
-CPPFLAGS= -I ./src -I ./test -Wall -std=c++14 -g -O0
+CFLAGS= -I ./src -I ./test -I ./reacto-0.1.0-rc2/includes -Wall -std=gnu11 -g -O0
+CPPFLAGS= -I ./src -I ./test -I ./reacto-0.1.0-rc2/includes -Wall -std=c++14 -g -O0
 LDFLAGS=
 
 OBJDIR = objs_test
@@ -15,6 +15,9 @@ SRCFILES = \
 
 SRCDIRS = \
     src \
+    reacto-0.1.0-rc2/src/reusables \
+    reacto-0.1.0-rc2/src/watchdog \
+    reacto-0.1.0-rc2/src \
     test \
 
 get_src_from_dir  = $(wildcard $1/*.cpp) $(wildcard $1/*.c)
@@ -26,6 +29,9 @@ __src_to = $(subst .c,$1, $(subst .cpp,$1,$2))
 src_to = $(addprefix $(OBJDIR)/,$(call __src_to,$1,$2))
 src_to_o = $(call src_to,.o,$1)
 OBJS = $(call src_to_o,$(SRCS))
+
+DEPS := $(OBJS:.o=.d)
+-include $(DEPS)
 
 all: $(PROJECT) run
 
@@ -39,12 +45,14 @@ $(PROJECT): buildrepo $(OBJS)
 	@chmod +x $(PROJECT)
 
 $(OBJDIR)/%.o: %.cpp
+	@echo
 	@echo Compiling $(notdir $<)
-	$(SILENT)$(CXX) $(CPPFLAGS) -c $< -o $@
+	$(SILENT)$(CXX) $(CPPFLAGS) -MMD -c $< -o $@
 
 $(OBJDIR)/%.o: %.c
+	@echo
 	@echo Compiling $(notdir $<)
-	$(SILENT)$(CC) $(CFLAGS) -c $< -o $@
+	$(SILENT)$(CC) $(CFLAGS) -MMD -c $< -o $@
 
 clean:
 	rm $(PROJECT) $(OBJDIR) -Rf

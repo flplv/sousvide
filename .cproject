@@ -34,7 +34,7 @@
 								<option id="gnu.c.compiler.option.preprocessor.undef.symbol.1448920662" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol" valueType="undefDefinedSymbols">
 									<listOptionValue builtIn="false" value="__cplusplus"/>
 								</option>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1390677643" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1390677643" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__NEWLIB__"/>
 									<listOptionValue builtIn="false" value="CORE_M0"/>
 								</option>

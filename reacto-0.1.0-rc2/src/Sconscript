@@ -1,0 +1,15 @@
+#!python
+Import('env')
+
+r = {
+    'libs' : [],
+    'path' : [],
+    'objs' : []
+}
+
+src = env.FindFiles('./', '*.c')
+lib = env.StaticLibrary('reacto', src)
+
+Depends(env.SourceToObjects(src), env['CPPINCLUDES'])
+r['libs'].extend(lib)
+Return('r')

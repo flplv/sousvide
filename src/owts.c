@@ -13,6 +13,7 @@
 #include <fl-lib.h>
 #include "owts.h"
 #include "error.h"
+#include "ios.h"
 
 static const uint16_t period_reset = 480;
 static const uint16_t period_tx_presence = 40;
@@ -23,6 +24,7 @@ static const uint16_t period_line_settle_one = 100;
 static const uint16_t period_pull_aquire = 1;
 static const uint16_t period_aquire_timeout = 0;
 static const uint16_t period_line_settle_aquire = 80;
+static const uint16_t period_line_settle_aquire_wait_conversion = 10000;
 
 enum consume_result {
     ok,
@@ -45,6 +47,25 @@ struct owts {
 	enum conversion_result conversion_result;
 };
 static struct owts d;
+
+static inline bool owts_drive_line (enum owts_action action)
+{
+	ios_set (ios_owts_debug, 0);
+
+    if (action == owts_wire_pull)
+    {
+    	ios_set_output (ios_owts_data);
+    }
+    else
+    {
+    	ios_set_input (ios_owts_data);
+    }
+
+    bool s = ios_get (ios_owts_data);
+    ios_set (ios_owts_debug, 1);
+
+    return s;
+}
 
 static inline struct event * event_buffer_peek ()
 {
@@ -140,22 +161,20 @@ static void pulse_zero ()
     PUSH (owts_wire_release, period_line_settle_zero, NULL);
 }
 
-static void pulse_acquire_consumer (enum consume_result (*consumer) (bool))
+static void pulse_acquire ()
 {
     struct event e;
     PUSH (owts_wire_pull, period_pull_aquire, NULL);
     PUSH (owts_wire_release, period_aquire_timeout, NULL);
-    PUSH (owts_wire_acquire, period_line_settle_aquire, consumer);
-}
-
-static void pulse_acquire ()
-{
-    pulse_acquire_consumer(consume_bit);
+    PUSH (owts_wire_acquire, period_line_settle_aquire, consume_bit);
 }
 
 static void pulse_wait_conversion ()
 {
-    pulse_acquire_consumer(consume_wait_conversion);
+    struct event e;
+    PUSH (owts_wire_pull, period_pull_aquire, NULL);
+    PUSH (owts_wire_release, period_aquire_timeout, NULL);
+    PUSH (owts_wire_acquire, period_line_settle_aquire_wait_conversion, consume_wait_conversion);
 }
 
 static void pulse_byte (uint8_t byte)
@@ -181,13 +200,6 @@ static void pulse_read_byte ()
 
 static void owts_on_timeout (uint16_t timestamp)
 {
-//    if (event_buffer_empty ())
-//    {
-//        owts_on_temperature (owts_conversion_fifo_unexpectedly_empty, 0);
-//        owts_init ();
-//        return;
-//    }
-
     struct event * e = event_buffer_peek ();
     event_buffer_pop ();
 
@@ -220,11 +232,12 @@ static void owts_on_timeout (uint16_t timestamp)
     	int32_t temp = ((int16_t)d.raw_temperature >> 1) * 125;
 
         owts_init ();
+        owts_isr_stop ();
         owts_on_temperature (result, temp);
         return;
     }
 
-    owts_isr_register_call (owts_on_timeout, timestamp + e->duration);
+    owts_isr_next_call (timestamp + e->duration);
 }
 
 void owts_start_conversion ()
@@ -239,7 +252,8 @@ void owts_start_conversion ()
     pulse_read_byte ();
     pulse_read_byte ();
     pulse_initialize ();
-    owts_isr_register_call (owts_on_timeout, 1000);
+    owts_isr_next_call (1000);
+    owts_isr_start (owts_on_timeout);
 }
 
 void owts_init ()
@@ -248,8 +262,15 @@ void owts_init ()
     d.conversion_result = owts_conversion_fifo_unexpectedly_empty;
     d.raw_temperature_bit_pos = 0;
     d.raw_temperature = 0;
+
+    ios_set_output (ios_owts_debug);
+    ios_set_input (ios_owts_data);
+    ios_set (ios_owts_debug, 1);
+    ios_set (ios_owts_data, 0);
+    owts_isr_stop ();
 }
 
 void owts_deinit ()
 {
+	ios_set_input (ios_owts_data);
 }
