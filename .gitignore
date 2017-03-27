@@ -2,3 +2,4 @@ objs/
 .tags*
 objs_*
 sousvide_lpcxpresso.axf
+sousvide_tests

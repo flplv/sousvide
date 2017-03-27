@@ -27,9 +27,9 @@ static const uint16_t period_line_settle_aquire = 80;
 static const uint16_t period_line_settle_aquire_wait_conversion = 10000;
 
 enum consume_result {
-    ok,
-    abort,
-    try_again,
+    owts_ok,
+    owts_abort,
+    owts_try_again,
 };
 
 struct event {
@@ -106,24 +106,24 @@ static inline bool event_buffer_full ()
 static enum consume_result consume_presence (bool state)
 {
     if (state == 0)
-        return ok;
+        return owts_ok;
 
     d.conversion_result = owts_conversion_no_presence;
-    return abort;
+    return owts_abort;
 }
 
 static enum consume_result consume_wait_conversion (bool state)
 {
     if (state == 1)
-        return ok;
+        return owts_ok;
 
-    return try_again;
+    return owts_try_again;
 }
 
 static enum consume_result consume_bit (bool state)
 {
     d.raw_temperature |= (state ? 1 : 0) << d.raw_temperature_bit_pos ++;
-    return ok;
+    return owts_ok;
 }
 
 static void push (const struct event * e)
@@ -205,11 +205,11 @@ static void owts_on_timeout (uint16_t timestamp)
 
     bool line_state = owts_drive_line ((enum owts_action)e->action);
 
-    enum consume_result result = ok;
+    enum consume_result result = owts_ok;
     if (e->consumer && e->action == owts_wire_acquire)
         result = e->consumer (line_state);
 
-    if (result == abort)
+    if (result == owts_abort)
     {
     	enum conversion_result result = d.conversion_result;
         owts_init ();
@@ -218,7 +218,7 @@ static void owts_on_timeout (uint16_t timestamp)
         return;
     }
 
-    if (result == try_again)
+    if (result == owts_try_again)
         event_buffer_recovery (3);
 
     if (event_buffer_empty ())
@@ -263,10 +263,12 @@ void owts_init ()
     d.raw_temperature_bit_pos = 0;
     d.raw_temperature = 0;
 
-    ios_set_output (ios_owts_debug);
     ios_set_input (ios_owts_data);
-    ios_set (ios_owts_debug, 1);
     ios_set (ios_owts_data, 0);
+
+    ios_set_output (ios_owts_debug);
+    ios_set (ios_owts_debug, 1);
+
     owts_isr_stop ();
 }
 

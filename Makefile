@@ -1,5 +1,5 @@
 all:
-#	make -f Makefile.tests all
+	make -f Makefile.tests all
 	make -f Makefile.lpcxpresso V=1 all
 
 clean:

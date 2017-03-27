@@ -2,7 +2,6 @@
 #include <chip.h>
 #include <fl-lib.h>
 
-__attribute__((optimize("-O3")))
 void ios_set (enum ios_pin pp, bool value)
 {
 	Chip_GPIO_SetPinState(LPC_GPIO,
@@ -11,7 +10,6 @@ void ios_set (enum ios_pin pp, bool value)
 			              value);
 }
 
-__attribute__((optimize("-O3")))
 bool ios_get (enum ios_pin pp)
 {
 	return Chip_GPIO_GetPinState (LPC_GPIO,
@@ -19,7 +17,6 @@ bool ios_get (enum ios_pin pp)
 			              ios_pin_number (pp));
 }
 
-__attribute__((optimize("-O3")))
 void ios_set_output (enum ios_pin pp)
 {
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO,
@@ -27,7 +24,6 @@ void ios_set_output (enum ios_pin pp)
             ios_pin_number (pp));
 }
 
-__attribute__((optimize("-O3")))
 void ios_set_input (enum ios_pin pp)
 {
 	Chip_GPIO_SetPinDIRInput(LPC_GPIO,

@@ -6,18 +6,31 @@ endif
 
 PROJECT = sousvide_tests
 
-CFLAGS= -I ./src -I ./test -I ./reacto-0.1.0-rc2/includes -Wall -std=gnu11 -g -O0
-CPPFLAGS= -I ./src -I ./test -I ./reacto-0.1.0-rc2/includes -Wall -std=c++14 -g -O0
+CFLAGS= -I ./src \
+        -I ./test \
+        -I ./reacto-0.1.0-rc2/includes \
+        -Wall \
+        -std=gnu11 \
+        -g \
+        -O0 \
+        -D REACTO_SHORT_LOGS \
+        
+        
+CPPFLAGS= -I ./src \
+        -I ./test \
+        -I ./reacto-0.1.0-rc2/includes \
+        -Wall \
+        -std=c++14 \
+        -g \
+        -O0 \
+        -D REACTO_SHORT_LOGS 
+
 LDFLAGS=
 
 OBJDIR = objs_test
 SRCFILES = \
 
 SRCDIRS = \
-    src \
-    reacto-0.1.0-rc2/src/reusables \
-    reacto-0.1.0-rc2/src/watchdog \
-    reacto-0.1.0-rc2/src \
     test \
 
 get_src_from_dir  = $(wildcard $1/*.cpp) $(wildcard $1/*.c)
