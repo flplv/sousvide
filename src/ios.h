@@ -106,7 +106,16 @@ enum __attribute__ ((__packed__)) ios_pin
 
 	ios_dpy_col_total = 8,
 	ios_dpy_line_total = 8, 
-	ios_dpy_groups_total = 3
+	ios_dpy_groups_total = 3,
+
+	ios_encoder_left = ios_port_1_pin_26,
+	ios_encoder_right = ios_port_1_pin_24,
+	ios_encoder_switch = ios_port_1_pin_25,
+};
+
+enum ios_input_event {
+    ios_input_event_down,
+    ios_input_event_up,
 };
 
 void ios_set (enum ios_pin, bool value);
@@ -114,6 +123,8 @@ bool ios_get (enum ios_pin);
 
 void ios_set_output (enum ios_pin);
 void ios_set_input (enum ios_pin);
+
+void ios_enable_input_event (enum ios_pin);
 
 static inline uint8_t ios_port_number (enum ios_pin portpin)
 {
