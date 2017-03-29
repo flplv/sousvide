@@ -7,7 +7,6 @@ enum ui_event
 {
     ui_event_left,
     ui_event_right,
-    ui_event_click_up,
     ui_event_click_down,
 };
 

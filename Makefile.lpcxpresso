@@ -23,14 +23,15 @@ CFLAGS= -I ./src \
         -I ./src_lpcxpresso_11xx \
         -I ./reacto-0.1.0-rc2/includes \
         -Wall -std=gnu11 -g \
-        -O3 \
+        -Os \
         -mcpu=cortex-m0 -mthumb \
         -D CHIP_LPC11UXX \
         -D CORE_M0 \
         -D CR_INTEGER_PRINTF -D CR_PRINTF_CHAR -D__LPC11UXX__ \
         -D__CODE_RED  \
         -D__USE_CMSIS \
-        -D REACTO_SHORT_LOGS
+        -D REACTO_SHORT_LOGS \
+        -fshort-enums
 
 LDFLAGS= -nostdlib \
          -Xlinker -Map="$(OBJDIR)/sousvide_lpcxpresso.map" \

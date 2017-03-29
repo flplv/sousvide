@@ -5,15 +5,6 @@
 #include "display.h"
 #include "ios.h"
 
-/* 8 per 8 dot matrix display, two color */
-enum pixel_color
-{
-    pixel_off = 0b00,
-    pixel_green = 0b01,
-    pixel_red = 0b10,
-//    pixel_orange = pixel_green | pixel_red
-};
-
 enum glyph_position
 {
     glyph_left,
@@ -22,6 +13,8 @@ enum glyph_position
 
 uint8_t __display_data_red [ios_dpy_col_total];
 uint8_t __display_data_green [ios_dpy_col_total];
+
+static enum pixel_color temperature_color = pixel_red;
 
 static void xor_pixel (uint8_t x, uint8_t y, enum pixel_color color)
 {
@@ -99,20 +92,28 @@ static void display_draw_number (const uint8_t * number, enum glyph_position pos
     const uint8_t y = 1;
 
     for (int i = 0; i < GLYPH_DATA_LEN; i ++)
-        write_horizontal (x, y + i, 3, pixel_red, number[i]);
+        write_horizontal (x, y + i, 3, temperature_color, number[i]);
 }
 
-static void display_draw_symbol (const uint8_t * symbol)
-{
-    const uint8_t x = 1;
-    const uint8_t y = 1;
+//static void display_draw_symbol (const uint8_t * symbol)
+//{
+//    const uint8_t x = 1;
+//    const uint8_t y = 1;
+//
+//    for (int i = 0; i < GLYPH_DATA_LEN; i ++)
+//        write_horizontal (x, y + i, 6, temperature_color, symbol[i]);
+//}
 
-    for (int i = 0; i < GLYPH_DATA_LEN; i ++)
-        write_horizontal (x, y + i, 6, pixel_red, symbol[i]);
-}
-
-static void display_draw_clock (uint8_t minutes)
+void display_draw_clock (int16_t minutes)
 {
+    write_dots_upward (0, 7, 8, pixel_off);
+    write_dots_rightward (1, 0, 7, pixel_off);
+    write_dots_downward (7, 0, 7, pixel_off);
+    write_dots_leftward (7, 7, 7, pixel_off);
+
+    if (minutes < 0)
+        return;
+
     int8_t dots = (minutes / 10) + 1;
 
     if (dots > 0)
@@ -129,6 +130,11 @@ static void display_draw_clock (uint8_t minutes)
 
     if (dots > 0)
         write_dots_leftward (7, 7, dots > 6 ? 6 : dots, pixel_green);
+}
+
+void display_draw_underline (enum pixel_color color)
+{
+    write_dots_rightward (1, 6, 6, color);
 }
 
 static void clock_position_to_pixel (uint8_t dots, uint8_t * xout, uint8_t * yout)
@@ -161,12 +167,12 @@ static void clock_position_to_pixel (uint8_t dots, uint8_t * xout, uint8_t * you
     *yout = y;
 }
 
-void display_tick_clock (uint8_t minutes)
+void display_tick_clock (int16_t minutes)
 {
     static uint8_t last = 1;
     uint8_t curr = (minutes / 10) + 1;
 
-    if (last < curr)
+    if (last < curr || minutes < 0)
     {
         display_draw_clock (minutes);
     }
@@ -185,11 +191,21 @@ void display_tick_clock (uint8_t minutes)
     last = curr;
 }
 
-void display_set_temperature (uint8_t temp)
+void display_draw_temperature_color (enum pixel_color color)
+{
+    temperature_color = color;
+}
+
+void display_draw_temperature (int16_t temp)
 {
 	if (temp > 99)
 	{
 	    display_draw_number (bitmap_number_one, glyph_left);
+	    display_draw_number (bitmap_number_dash, glyph_right);
+	}
+	else if (temp < 0)
+	{
+	    display_draw_number (bitmap_number_dash, glyph_left);
 	    display_draw_number (bitmap_number_dash, glyph_right);
 	}
 	else

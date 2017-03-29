@@ -17,7 +17,6 @@ static int temperature_handler (queue_t * queue)
     int32_t temperature = 0;
     queue_peek(queue, temperature_buffer, &temperature);
 
-    log_message ("T=%"PRIi32, temperature);
     ui_temperature (temperature / 1000);
     owts_start_conversion ();
     return 0;

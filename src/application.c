@@ -16,5 +16,6 @@ void application_loop ()
     ui_init ();
     encoder_init ();
 
+    owts_start_conversion ();
     main_loop_run(reacto_context_main_loop());
 }

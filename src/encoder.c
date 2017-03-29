@@ -3,36 +3,42 @@
 #include "encoder.h"
 #include "ui.h"
 
-void encoder_input_event (enum ios_input_event event, enum ios_pin pin)
+void encoder_input_scroll (bool dt_state)
 {
 	static reacto_time_t last = 0;
 	reacto_time_t now = time_now ();
 
-	if (!timeout_check_elapsed(now, last, 20))
+	if (!timeout_check_elapsed(now, last, 10))
 		return;
 
 	last = now;
 
-	if (pin == ios_encoder_switch)
-	{
-		ui_push (event == ios_input_event_down ? ui_event_click_down : ui_event_click_up);
+    ios_set (ios_encoder_debug, 0);
+    if (dt_state)
+        ui_push (ui_event_left);
+    else
+        ui_push (ui_event_right);
+    ios_set (ios_encoder_debug, 1);
+}
+
+void encoder_input_push ()
+{
+	static reacto_time_t last = 0;
+	reacto_time_t now = time_now ();
+
+	if (!timeout_check_elapsed(now, last, 500))
 		return;
-	}
 
-	if (event == ios_input_event_down)
-	{
-		if (pin == ios_encoder_left)
-			ui_push (ui_event_left);
-
-		if (pin == ios_encoder_right)
-			ui_push (ui_event_right);
-	}
+    ui_push (ui_event_click_down);
 }
 
 void encoder_init ()
 {
-    ios_set_input (ios_encoder_left);
-    ios_set_input (ios_encoder_right);
+    ios_set_input (ios_encoder_clk);
+    ios_set_input (ios_encoder_dt);
     ios_set_input (ios_encoder_switch);
+
+    ios_set (ios_encoder_debug, 1);
+    ios_set_output (ios_encoder_debug);
 }
 

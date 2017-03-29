@@ -108,9 +108,10 @@ enum __attribute__ ((__packed__)) ios_pin
 	ios_dpy_line_total = 8, 
 	ios_dpy_groups_total = 3,
 
-	ios_encoder_left = ios_port_1_pin_26,
-	ios_encoder_right = ios_port_1_pin_24,
+	ios_encoder_clk = ios_port_1_pin_26,
+	ios_encoder_dt = ios_port_1_pin_24,
 	ios_encoder_switch = ios_port_1_pin_25,
+	ios_encoder_debug =  ios_port_1_pin_23,
 };
 
 enum ios_input_event {

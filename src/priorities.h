@@ -3,8 +3,8 @@
 
 enum priorities {
 	/* the lesser the prioritized */
-	priorities_owts = 1,
-	priorities_encoder = 2,
+	priorities_encoder = 1,
+	priorities_owts = 2,
 	priorities_display = 3,
 };
 

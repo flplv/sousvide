@@ -3,6 +3,7 @@
 #include <fl-lib.h>
 #include <encoder.h>
 #include <priorities.h>
+#include <reacto/reusables/timeout.h>
 
 void ios_set (enum ios_pin pp, bool value)
 {
@@ -79,30 +80,35 @@ static const struct pin_mux_cfg pin_mux_mapping [] = {
 
 static inline void process_encoder_pin_interrupt (enum ios_pin pin, uint8_t ch)
 {
-    uint32_t fall = Chip_PININT_GetFallStates (LPC_PININT) & PININTCH (ch);
-	Chip_PININT_ClearFallStates (LPC_PININT, fall);
-    Chip_PININT_ClearIntStatus (LPC_PININT, PININTCH (ch));
 
-    if (fall)
-        encoder_input_event (ios_input_event_down, pin);
 }
 
 void FLEX_INT0_IRQHandler ()
 {
-    process_encoder_pin_interrupt (ios_encoder_left, 0);
-    NVIC_ClearPendingIRQ(PIN_INT0_IRQn);
-}
+    ios_set (ios_encoder_debug, 0);
+    bool dt = ios_get (ios_encoder_dt);
+    ios_set (ios_encoder_debug, 1);
 
-void FLEX_INT1_IRQHandler ()
-{
-    process_encoder_pin_interrupt (ios_encoder_right, 1);
-    NVIC_ClearPendingIRQ(PIN_INT1_IRQn);
+    uint32_t fall = Chip_PININT_GetFallStates (LPC_PININT) & PININTCH (0);
+    Chip_PININT_ClearFallStates (LPC_PININT, fall);
+    Chip_PININT_ClearIntStatus (LPC_PININT, PININTCH (0));
+
+    encoder_input_scroll (dt);
+
+    NVIC_ClearPendingIRQ(PIN_INT0_IRQn);
 }
 
 void FLEX_INT2_IRQHandler ()
 {
-    process_encoder_pin_interrupt (ios_encoder_switch, 2);
+    ios_set (ios_encoder_debug, 0);
+    uint32_t fall = Chip_PININT_GetFallStates (LPC_PININT) & PININTCH (2);
+    Chip_PININT_ClearFallStates (LPC_PININT, fall);
+    Chip_PININT_ClearIntStatus (LPC_PININT, PININTCH (2));
+
+    encoder_input_push ();
+
     NVIC_ClearPendingIRQ(PIN_INT2_IRQn);
+    ios_set (ios_encoder_debug, 1);
 }
 
 void ios_platform_init ()
@@ -112,22 +118,22 @@ void ios_platform_init ()
     Chip_PININT_Init (LPC_PININT);
 
     Chip_SYSCTL_SetPinInterrupt (0,
-                                 ios_port_number(ios_encoder_left),
-                                 ios_pin_number(ios_encoder_left));
+                                 ios_port_number(ios_encoder_clk),
+                                 ios_pin_number(ios_encoder_clk));
 
     Chip_SYSCTL_SetPinInterrupt (1,
-                                 ios_port_number(ios_encoder_right),
-                                 ios_pin_number(ios_encoder_right));
+                                 ios_port_number(ios_encoder_dt),
+                                 ios_pin_number(ios_encoder_dt));
 
     Chip_SYSCTL_SetPinInterrupt (2,
                                  ios_port_number(ios_encoder_switch),
                                  ios_pin_number(ios_encoder_switch));
 
-    Chip_PININT_SetPinModeEdge (LPC_PININT, 0x03);
-    Chip_PININT_EnableIntLow (LPC_PININT, 0x03);
+    Chip_PININT_SetPinModeEdge (LPC_PININT, 0x05);
+    Chip_PININT_EnableIntLow (LPC_PININT, 0x05);
 
     NVIC_EnableIRQ(PIN_INT0_IRQn);
-    NVIC_EnableIRQ(PIN_INT1_IRQn);
+//    NVIC_EnableIRQ(PIN_INT1_IRQn);
     NVIC_EnableIRQ(PIN_INT2_IRQn);
     NVIC_SetPriority (PIN_INT0_IRQn, priorities_encoder);
     NVIC_SetPriority (PIN_INT1_IRQn, priorities_encoder);
