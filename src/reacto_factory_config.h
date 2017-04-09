@@ -3,7 +3,7 @@
 
 enum reacto_queue_id
 {
-    reacto_queue_id_temperature = 0,
+    reacto_queue_id_control = 0,
     reacto_queue_id_ui = 1,
     reacto_queue_id_log = 2,
     reacto_queue_id_max,

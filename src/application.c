@@ -7,6 +7,7 @@
 #include "ui.h"
 #include "error.h"
 #include "events.h"
+#include "control.h"
 
 void application_loop ()
 {
@@ -15,7 +16,7 @@ void application_loop ()
     events_init ();
     ui_init ();
     encoder_init ();
+    control_init ();
 
-    owts_start_conversion ();
     main_loop_run(reacto_context_main_loop());
 }

@@ -8,7 +8,7 @@ enum pixel_color
     pixel_off = 0b00,
     pixel_green = 0b01,
     pixel_red = 0b10,
-//    pixel_orange = pixel_green | pixel_red
+    pixel_orange = pixel_green | pixel_red
 };
 
 static inline enum ios_pin ios_dpy_red (uint8_t line)
@@ -111,6 +111,7 @@ static inline void display_ios_periodic ()
 void display_init ();
 void display_draw_temperature (int16_t);
 void display_draw_temperature_color (enum pixel_color);
+void display_draw_timer_symbol ();
 
 void display_tick_clock (int16_t minutes);
 void display_draw_clock (int16_t minutes);

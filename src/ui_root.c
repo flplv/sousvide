@@ -15,19 +15,6 @@ static void input_temperature (int16_t temperature)
 
 static void input_action (struct ui_input_action action)
 {
-    int16_t timer = control_get_timer ();
-    timer += 10 * action.intensity * (action.type == ui_action_left ? -1 : +1);
-
-    if (timer < 0)
-        timer = -1;
-
-    if (timer > 400)
-        timer = 400;
-
-    timer -= timer % 10;
-
-    control_set_timer (timer);
-    display_draw_clock (timer);
 }
 
 static void on_enter ()
@@ -38,9 +25,22 @@ static void on_enter ()
     display_draw_underline (pixel_off);
 }
 
+static void on_exit ()
+{
+}
+
 static void on_one_sec_ticker ()
 {
+    static bool s = 0;
+
     display_tick_clock (control_get_timer ());
+
+    if (s)
+        display_draw_underline (control_is_on () ? pixel_orange : pixel_off);
+    else
+        display_draw_underline (pixel_off);
+
+    s = !s;
 }
 
 const struct ui_processor ui_root_processor =
@@ -48,5 +48,6 @@ const struct ui_processor ui_root_processor =
     .input_temperature = input_temperature,
     .input_action = input_action,
     .on_enter = on_enter,
+    .on_exit = on_exit,
     .on_one_sec_ticker = on_one_sec_ticker
 };

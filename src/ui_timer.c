@@ -3,7 +3,7 @@
 #include "control.h"
 #include "display.h"
 
-static int16_t selected_setpoing;
+static int16_t selected_timer;
 
 static void input_temperature (int16_t temperature)
 {
@@ -11,26 +11,28 @@ static void input_temperature (int16_t temperature)
 
 static void input_action (struct ui_input_action action)
 {
-    int sp = selected_setpoing;
-    sp += action.intensity * (action.type == ui_action_left ? -1 : +1);
+    int16_t timer = selected_timer;
+    timer += 10 * action.intensity * (action.type == ui_action_left ? -1 : +1);
 
-    if (sp < 0)
-        sp = 0;
+    if (timer > 400)
+        timer = 400;
 
-    if (sp > 99)
-        sp = 99;
+    if (timer < 0)
+        timer = -10;
 
-    selected_setpoing = sp;
-    display_draw_temperature (selected_setpoing);
+    timer -= timer % 10;
+
+    selected_timer = timer;
+    display_draw_clock (timer);
 }
 
 static void on_enter ()
 {
-    selected_setpoing = control_get_setpoint ();
+    selected_timer = control_get_timer ();
 
     display_draw_temperature_color (pixel_orange);
-    display_draw_temperature (selected_setpoing);
-    display_draw_clock (-1);
+    display_draw_timer_symbol ();
+    display_draw_clock (selected_timer);
     display_draw_underline (pixel_off);
 }
 
@@ -39,7 +41,7 @@ static void on_one_sec_ticker ()
 //    static bool s = 0;
 //
 //    if (s)
-//        display_draw_underline (pixel_green);
+//        display_draw_underline (pixel_red);
 //    else
 //        display_draw_underline (pixel_off);
 //
@@ -48,10 +50,10 @@ static void on_one_sec_ticker ()
 
 static void on_exit ()
 {
-    control_set_setpoint (selected_setpoing);
+    control_set_timer (selected_timer);
 }
 
-const struct ui_processor ui_setpoint_processor =
+const struct ui_processor ui_timer_processor =
 {
     .input_temperature = input_temperature,
     .input_action = input_action,

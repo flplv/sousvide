@@ -22,6 +22,7 @@ static const struct ui_processor * registered_uis [] =
 {
         &ui_root_processor,
         &ui_setpoint_processor,
+        &ui_timer_processor,
         NULL
 };
 
@@ -42,37 +43,38 @@ static void timeout (timed_event_t * ev)
     if (selected_ui == 0)
         return;
 
+    registered_uis [selected_ui]->on_exit ();
     selected_ui = 0;
     registered_uis [selected_ui]->on_enter ();
 }
 
 static void consume_input (struct event ev)
 {
-    static reacto_time_t last_scroll = 0;
-    static enum ui_event last_scroll_direction;
-    reacto_time_t now = time_now ();
+//    static reacto_time_t last_scroll = 0;
+//    static enum ui_event last_scroll_direction;
+//    reacto_time_t now = time_now ();
 
     if (ev.type == ui_event_click_down)
     {
+        registered_uis [selected_ui]->on_exit ();
         selected_ui ++;
         selected_ui %= FL_ARRAY_SIZE(registered_uis) - 1;
-
         registered_uis [selected_ui]->on_enter ();
     }
     else
     {   struct ui_input_action action;
 
-        if (last_scroll_direction == ev.type)
-            action.intensity = timeout_check_elapsed (now, last_scroll, 20) ? 1 : 5;
-        else
+//        if (last_scroll_direction == ev.type)
+//            action.intensity = timeout_check_elapsed (now, last_scroll, 20) ? 1 : 5;
+//        else
             action.intensity = 1;
 
         action.type = ev.type == ui_event_left ? ui_action_left : ui_action_right;
 
         registered_uis [selected_ui]->input_action (action);
 
-        last_scroll_direction = ev.type;
-        last_scroll = now;
+//        last_scroll_direction = ev.type;
+//        last_scroll = now;
     }
 
     timed_queue_link (reacto_context_timed_queue(), &timeout_ev);

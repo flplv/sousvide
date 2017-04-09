@@ -83,7 +83,7 @@ enum __attribute__ ((__packed__)) ios_pin
 	ios_dpy_col_0 = ios_port_1_pin_31,
 	ios_dpy_col_7 = ios_port_0_pin_14,
 	ios_dpy_col_6 = ios_port_0_pin_17,
-	ios_dpy_col_5 = ios_port_0_pin_3,
+	ios_dpy_col_5 = ios_port_0_pin_1,
 	ios_dpy_col_4 = ios_port_1_pin_15,
 
 	ios_dpy_line_green_0 = ios_port_0_pin_12,
@@ -112,6 +112,9 @@ enum __attribute__ ((__packed__)) ios_pin
 	ios_encoder_dt = ios_port_1_pin_24,
 	ios_encoder_switch = ios_port_1_pin_25,
 	ios_encoder_debug =  ios_port_1_pin_23,
+
+	ios_control_relay_1 = ios_port_0_pin_21,
+	ios_control_relay_2 = ios_port_0_pin_22,
 };
 
 enum ios_input_event {

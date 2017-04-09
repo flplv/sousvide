@@ -95,14 +95,14 @@ static void display_draw_number (const uint8_t * number, enum glyph_position pos
         write_horizontal (x, y + i, 3, temperature_color, number[i]);
 }
 
-//static void display_draw_symbol (const uint8_t * symbol)
-//{
-//    const uint8_t x = 1;
-//    const uint8_t y = 1;
-//
-//    for (int i = 0; i < GLYPH_DATA_LEN; i ++)
-//        write_horizontal (x, y + i, 6, temperature_color, symbol[i]);
-//}
+static void display_draw_symbol (const uint8_t * symbol)
+{
+    const uint8_t x = 1;
+    const uint8_t y = 1;
+
+    for (int i = 0; i < GLYPH_DATA_LEN; i ++)
+        write_horizontal (x, y + i, 6, temperature_color, symbol[i]);
+}
 
 void display_draw_clock (int16_t minutes)
 {
@@ -194,6 +194,11 @@ void display_tick_clock (int16_t minutes)
 void display_draw_temperature_color (enum pixel_color color)
 {
     temperature_color = color;
+}
+
+void display_draw_timer_symbol ()
+{
+    display_draw_symbol (bitmap_letter_time);
 }
 
 void display_draw_temperature (int16_t temp)
